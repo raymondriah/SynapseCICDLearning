@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "elalab"
+		},
+		"elalab-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:elalab.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synapse-ca-lab-workspace1412326145-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synapse-ca-lab-workspace1412326145.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"elalab-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://lacreda001.dfs.core.windows.net"
+		},
+		"public_holiday_sasUri": {
+			"value": ""
+		},
+		"synapse-ca-lab-workspace1412326145-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://synapsel200labadls.dfs.core.windows.net"
+		}
+	}
+}

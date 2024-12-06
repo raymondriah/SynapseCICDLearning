@@ -1,0 +1,631 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "elalab"
+		},
+		"elalab-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'elalab-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:elalab.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synapse-ca-lab-workspace1412326145-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synapse-ca-lab-workspace1412326145-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synapse-ca-lab-workspace1412326145.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"elalab-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://lacreda001.dfs.core.windows.net"
+		},
+		"public_holiday_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'public_holiday'"
+		},
+		"synapse-ca-lab-workspace1412326145-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapsel200labadls.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/elalab-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('elalab-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/elalab-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('elalab-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/public_holiday')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('public_holiday_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapse-ca-lab-workspace1412326145-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synapse-ca-lab-workspace1412326145-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapse-ca-lab-workspace1412326145-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synapse-ca-lab-workspace1412326145-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create external table with SQL severless')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* Note: this script is filtered on a specific month. You can modify the location to read the entire dataset. */\n\nIF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat')\n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat]\n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyctlc_azureopendatastorage_blob_core_windows_net')\n\tCREATE EXTERNAL DATA SOURCE [nyctlc_azureopendatastorage_blob_core_windows_net]\n\tWITH (\n\t\tLOCATION = 'wasbs://nyctlc@azureopendatastorage.blob.core.windows.net',\n\t    (TYPE = HADOOP)\n\t)\nGO\n\nCREATE EXTERNAL TABLE nyc_tlc_yellow_trip_ext (\n\t[vendorID] varchar(8000),\n\t[tpepPickupDateTime] datetime2(7),\n\t[tpepDropoffDateTime] datetime2(7),\n\t[passengerCount] int,\n\t[tripDistance] float,\n\t[puLocationId] varchar(8000),\n\t[doLocationId] varchar(8000),\n\t[startLon] float,\n\t[startLat] float,\n\t[endLon] float,\n\t[endLat] float,\n\t[rateCodeId] int,\n\t[storeAndFwdFlag] varchar(8000),\n\t[paymentType] varchar(8000),\n\t[fareAmount] float,\n\t[extra] float,\n\t[mtaTax] float,\n\t[improvementSurcharge] varchar(8000),\n\t[tipAmount] float,\n\t[tollsAmount] float,\n\t[totalAmount] float\n\t)\n\tWITH (\n    LOCATION = 'yellow/puYear=2014/puMonth=3/',\n    -- LOCATION = 'yellow'\n\tDATA_SOURCE = [nyctlc_azureopendatastorage_blob_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat],\n\tREJECT_TYPE = VALUE,\n\tREJECT_VALUE = 0\n\t)\nGO\n\nSELECT TOP 100 * FROM nyc_tlc_yellow_trip_ext\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "moonlight",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create external table with SQL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* Note: this script is filtered on a specific month. You can modify the location to read the entire dataset. */\nIF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseParquetFormat')\n\tCREATE EXTERNAL FILE FORMAT [SynapseParquetFormat]\n\tWITH ( FORMAT_TYPE = PARQUET)\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyctlc_azureopendatastorage_blob_core_windows_net')\n\tCREATE EXTERNAL DATA SOURCE [nyctlc_azureopendatastorage_blob_core_windows_net]\n\tWITH (\n\t\tLOCATION = 'wasbs://nyctlc@azureopendatastorage.blob.core.windows.net',\n\t\tTYPE     = HADOOP\n\t)\nGO\n\nCREATE EXTERNAL TABLE nyc_tlc_yellow_trip_ext (\n\t[vendorID] varchar(8000),\n\t[tpepPickupDateTime] datetime2(7),\n\t[tpepDropoffDateTime] datetime2(7),\n\t[passengerCount] int,\n\t[tripDistance] float,\n\t[puLocationId] varchar(8000),\n\t[doLocationId] varchar(8000),\n\t[startLon] float,\n\t[startLat] float,\n\t[endLon] float,\n\t[endLat] float,\n\t[rateCodeId] int,\n\t[storeAndFwdFlag] varchar(8000),\n\t[paymentType] varchar(8000),\n\t[fareAmount] float,\n\t[extra] float,\n\t[mtaTax] float,\n\t[improvementSurcharge] varchar(8000),\n\t[tipAmount] float,\n\t[tollsAmount] float,\n\t[totalAmount] float\n\t)\n\tWITH (\n    LOCATION = 'yellow/puYear=2014/puMonth=3/',\n    -- LOCATION = 'yellow'\n\tDATA_SOURCE = [nyctlc_azureopendatastorage_blob_core_windows_net],\n\tFILE_FORMAT = [SynapseParquetFormat],\n\tREJECT_TYPE = VALUE,\n\tREJECT_VALUE = 0\n\t)\nGO\n\nSELECT TOP 100 * FROM nyc_tlc_yellow_trip_ext\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleSQL",
+						"poolName": "SampleSQL"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Query data with SQL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/*\nFull tutorial available on: https://docs.microsoft.com/en-us/azure/synapse-analytics/sql/tutorial-data-analyst\nIn this tutorial, you learn how to perform exploratory data analysis by combining different Azure Open Datasets\nusing serverless SQL pool and then visualizing the results in Azure Synapse Studio.\n\nIn particular, you analyze the New York City (NYC) Taxi dataset that includes:\n\n - Pickup and drop-off dates and times.\n - Pick up and drop-off locations.\n - Trip distances.\n - Itemized fares.\n - Rate types.\n - Payment types.\n - Driver-reported passenger counts.*/\n\n\n/*\n * * * * * * * * * * * * * * * *\n * Automatic schema inference  *\n * * * * * * * * * * * * * * * *\n\nSince data is stored in the Parquet file format, automatic schema inference is available.\nYou can easily query the data without listing the data types of all columns in the files.\nYou also can use the virtual column mechanism and the filepath function to filter out a certain subset of files.\n\nLet's first get familiar with the NYC Taxi data by running the following query. */\n\nSELECT TOP 100 * FROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=2019/puMonth=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [nyc];\n\n\n/* Similarly, you can query the Public Holidays dataset by using the following query. */\n\nSELECT TOP 100 * FROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/holidaydatacontainer/Processed/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [holidays];\n\n/* Lastly, you can also query the Weather Data dataset by using the following query. */\n\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/isdweatherdatacontainer/ISDWeather/year=2018/month=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [weather];\n\n/* You can learn more about the meaning of the individual columns in the descriptions\nof the NYC Taxi, Public Holidays, and Weather Data datasets on the Azure Opendatasets page. */\n\n\n/*\n * * * * * * * * * * * * * * * * * * * * * * * * * *\n * Time series, seasonality, and outlier analysis  *\n * * * * * * * * * * * * * * * * * * * * * * * * * *\nYou can easily summarize the yearly number of taxi rides by using the following query. */\n\nSELECT\n    YEAR(tpepPickupDateTime) AS current_year,\n    COUNT(*) AS rides_per_year\nFROM\n    OPENROWSET(\n        BULK 'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet',\n        FORMAT='PARQUET'\n    ) AS [nyc]\nWHERE nyc.filepath(1) >= '2014' AND nyc.filepath(1) <= '2019'\nGROUP BY YEAR(tpepPickupDateTime)\nORDER BY 1 ASC;\n\n/* The data can be visualized in Synapse Studio by switching from the Table to the Chart view.\nYou can choose among different chart types, such as Area, Bar, Column, Line, Pie, and Scatter.\nIn this case, plot the Column chart with the Category column set to current_year.\n\nFrom this visualization, a trend of a decreasing number of rides over years can be clearly seen.\nPresumably, this decrease is due to the recent increased popularity of ride-sharing companies.\n*/\n\n\n/* For full tutorial click on \"?\" in top right corner then Knowledge center/Browse Available Samples/SQL Scripts/Analyze Azure Open Datasets using serverless SQL pool*/\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Query folders and multiple files')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "/* Read all files in folder */\nSELECT\n    YEAR(pickup_datetime) as [year],\n    SUM(passenger_count) AS passengers_total,\n    COUNT(*) AS [rides_total]\nFROM OPENROWSET(\n    BULK 'https://sqlondemandstorage.blob.core.windows.net/public-csv/taxi/*.csv',\n    FORMAT = 'CSV', PARSER_VERSION = '2.0',\n    FIRSTROW = 2\n    )\n    WITH (\n        pickup_datetime DATETIME2 2,\n        passenger_count INT 4\n    ) AS nyc\nGROUP BY\n    YEAR(pickup_datetime)\nORDER BY\n    YEAR(pickup_datetime);\n\n/* Read subset of files in folder */\nSELECT\n    payment_type,\n    SUM(fare_amount) AS fare_total\nFROM OPENROWSET(\n    BULK 'https://sqlondemandstorage.blob.core.windows.net/public-csv/taxi/yellow_tripdata_2017-*.csv',\n    FORMAT = 'CSV', PARSER_VERSION = '2.0',\n    FIRSTROW = 2\n    )\n    WITH (\n        payment_type INT 10,\n        fare_amount FLOAT 11\n    ) AS nyc\nGROUP BY payment_type\nORDER BY payment_type;\n\n\n/* Read all files from specific folder */\nSELECT\n    YEAR(pickup_datetime) as [year],\n    SUM(passenger_count) AS passengers_total,\n    COUNT(*) AS [rides_total]\nFROM OPENROWSET(\n    BULK 'https://sqlondemandstorage.blob.core.windows.net/public-csv/taxi/',\n    FORMAT = 'CSV', PARSER_VERSION = '2.0',\n    FIRSTROW = 2\n    )\n    WITH (\n        vendor_id VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_datetime DATETIME2,\n        dropoff_datetime DATETIME2,\n        passenger_count INT,\n        trip_distance FLOAT,\n        rate_code INT,\n        store_and_fwd_flag VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_location_id INT,\n        dropoff_location_id INT,\n        payment_type INT,\n        fare_amount FLOAT,\n        extra FLOAT,\n        mta_tax FLOAT,\n        tip_amount FLOAT,\n        tolls_amount FLOAT,\n        improvement_surcharge FLOAT,\n        total_amount FLOAT\n    ) AS nyc\nGROUP BY\n    YEAR(pickup_datetime)\nORDER BY\n    YEAR(pickup_datetime);\n\n/* Read all files from multiple folders */\nSELECT\n    YEAR(pickup_datetime) as [year],\n    SUM(passenger_count) AS passengers_total,\n    COUNT(*) AS [rides_total]\nFROM OPENROWSET(\n    BULK 'https://sqlondemandstorage.blob.core.windows.net/public-csv/t*i/',\n    FORMAT = 'CSV', PARSER_VERSION = '2.0',\n    FIRSTROW = 2\n    )\n    WITH (\n        vendor_id VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_datetime DATETIME2,\n        dropoff_datetime DATETIME2,\n        passenger_count INT,\n        trip_distance FLOAT,\n        rate_code INT,\n        store_and_fwd_flag VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_location_id INT,\n        dropoff_location_id INT,\n        payment_type INT,\n        fare_amount FLOAT,\n        extra FLOAT,\n        mta_tax FLOAT,\n        tip_amount FLOAT,\n        tolls_amount FLOAT,\n        improvement_surcharge FLOAT,\n        total_amount FLOAT\n    ) AS nyc\nGROUP BY\n    YEAR(pickup_datetime)\nORDER BY\n    YEAR(pickup_datetime);\n\n/* Multiple wildcards */\nSELECT\n    YEAR(pickup_datetime) as [year],\n    SUM(passenger_count) AS passengers_total,\n    COUNT(*) AS [rides_total]\nFROM OPENROWSET(\n    BULK 'https://sqlondemandstorage.blob.core.windows.net/public-csv/t*i/yellow_tripdata_2017-*.csv',\n    FORMAT = 'CSV', PARSER_VERSION = '2.0',\n    FIRSTROW = 2\n    )\n    WITH (\n        vendor_id VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_datetime DATETIME2,\n        dropoff_datetime DATETIME2,\n        passenger_count INT,\n        trip_distance FLOAT,\n        rate_code INT,\n        store_and_fwd_flag VARCHAR(100) COLLATE Latin1_General_BIN2,\n        pickup_location_id INT,\n        dropoff_location_id INT,\n        payment_type INT,\n        fare_amount FLOAT,\n        extra FLOAT,\n        mta_tax FLOAT,\n        tip_amount FLOAT,\n        tolls_amount FLOAT,\n        improvement_surcharge FLOAT,\n        total_amount FLOAT\n    ) AS nyc\nGROUP BY\n    YEAR(pickup_datetime)\nORDER BY\n    YEAR(pickup_datetime);\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SampleSQL",
+						"poolName": "SampleSQL"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Explore sample data with Spark')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SampleSpark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "f1df83d6-58aa-4653-860c-c2138f750d18"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1",
+						"state": {
+							"bb63e71b-675b-4299-b1b7-66b907826657": {
+								"type": "Synapse.DataFrame",
+								"sync_state": {
+									"table": {
+										"rows": [
+											{
+												"0": "1",
+												"1": "2.955385293728598",
+												"2": "4624873.580000002"
+											},
+											{
+												"0": "6",
+												"1": "3.0823106614325835",
+												"2": "187660.31999999998"
+											},
+											{
+												"0": "3",
+												"1": "3.124120509875713",
+												"2": "274744.52999999985"
+											},
+											{
+												"0": "5",
+												"1": "3.1096431007047065",
+												"2": "314624.3600000001"
+											},
+											{
+												"0": "9",
+												"1": "6.23",
+												"2": "49.84"
+											},
+											{
+												"0": "4",
+												"1": "3.132080374155551",
+												"2": "126570.49999999999"
+											},
+											{
+												"0": "8",
+												"1": "7.831666666666666",
+												"2": "46.989999999999995"
+											},
+											{
+												"0": "7",
+												"1": "2.382",
+												"2": "11.91"
+											},
+											{
+												"0": "2",
+												"1": "3.198328131230063",
+												"2": "1026740.0899999997"
+											},
+											{
+												"0": "0",
+												"1": "2.9365876998482907",
+												"2": "50327.240000000005"
+											}
+										],
+										"schema": [
+											{
+												"key": "0",
+												"name": "passengerCount",
+												"type": "int"
+											},
+											{
+												"key": "1",
+												"name": "AvgTripDistance",
+												"type": "double"
+											},
+											{
+												"key": "2",
+												"name": "SumTripDistance",
+												"type": "double"
+											}
+										]
+									},
+									"isSummary": false,
+									"language": "scala"
+								},
+								"persist_state": {
+									"view": {
+										"type": "details",
+										"chartOptions": {
+											"chartType": "bar",
+											"aggregationType": "sum",
+											"categoryFieldKeys": [
+												"1"
+											],
+											"seriesFieldKeys": [
+												"0"
+											],
+											"isStacked": false
+										}
+									}
+								}
+							}
+						}
+					},
+					"enableDebugMode": false,
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/cf767466-c96d-4523-80c5-7466e7c7846e/resourceGroups/RayRGEUS/providers/Microsoft.Synapse/workspaces/elalab/bigDataPools/SampleSpark",
+						"name": "SampleSpark",
+						"type": "Spark",
+						"endpoint": "https://elalab.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SampleSpark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 3,
+						"cores": 8,
+						"memory": 56,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "markdown",
+						"source": [
+							"# Explore NYC Yellow Taxi Data using Spark\n",
+							"\n",
+							"In this notebook, you'll learn the basic steps to load and analyze an Open Dataset that tracks NYC Yellow Taxi trips with Apache Spark for Azure Synapse.\n",
+							"\n",
+							"\n",
+							""
+						]
+					},
+					{
+						"cell_type": "markdown",
+						"source": [
+							"## Load Data\n",
+							"\n",
+							"Read NYC Yellow Taxi data as a Spark DataFrame object to manipulate."
+						]
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"# Read NYC yellow cab data from Azure Open Datasets\n",
+							"from azureml.opendatasets import NycTlcYellow\n",
+							"\n",
+							"from datetime import datetime\n",
+							"from dateutil import parser\n",
+							"\n",
+							"end_date = parser.parse('2018-05-08 00:00:00')\n",
+							"start_date = parser.parse('2018-05-01 00:00:00')\n",
+							"\n",
+							"nyc_tlc = NycTlcYellow(start_date=start_date, end_date=end_date)\n",
+							"df_nyc_tlc = nyc_tlc.to_spark_dataframe()"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "markdown",
+						"source": [
+							"## Analyze the NYC Taxi data using Spark and notebooks\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"df_nyc_tlc.printSchema()"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"diagram": {
+								"activateDiagramType": 1,
+								"chartConfig": {
+									"category": "bar",
+									"keys": [
+										"AvgTripDistance"
+									],
+									"values": [
+										"passengerCount"
+									],
+									"yLabel": "passengerCount",
+									"xLabel": "AvgTripDistance",
+									"aggregation": "SUM",
+									"aggByBackend": false
+								},
+								"aggData": "{\"passengerCount\":{\"2.382\":7,\"2.9365876998482907\":0,\"2.955385293728598\":1,\"3.0823106614325835\":6,\"3.1096431007047065\":5,\"3.124120509875713\":3,\"3.132080374155551\":4,\"3.1983281312300624\":2,\"6.23\":9,\"7.831666666666666\":8}}",
+								"isSummary": false,
+								"previewData": {
+									"filter": null
+								},
+								"isSql": false
+							},
+							"collapsed": false
+						},
+						"source": [
+							"from pyspark.sql import functions as F\n",
+							"df_nyc = df_nyc_tlc.groupBy(\"passengerCount\").agg(F.avg('tripDistance').alias('AvgTripDistance'), F.sum('tripDistance').alias('SumTripDistance'))\n",
+							"display(df_nyc)"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "markdown",
+						"source": [
+							"## Customize data visualization with Spark and notebooks\n",
+							"You can control how charts render by using notebooks. The following code shows a simple example. It uses the popular libraries matplotlib and seaborn. The code renders the same kind of line chart as the SQL queries we ran earlier.\n",
+							"\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"import matplotlib.pyplot\n",
+							"import seaborn\n",
+							"\n",
+							"seaborn.set(style = \"whitegrid\")\n",
+							"pdf_nyc = df_nyc.toPandas()\n",
+							"seaborn.lineplot(x=\"passengerCount\", y=\"SumTripDistance\" , data = pdf_nyc)\n",
+							"seaborn.lineplot(x=\"passengerCount\", y=\"AvgTripDistance\" , data = pdf_nyc)\n",
+							"matplotlib.pyplot.show()"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "markdown",
+						"source": [
+							"## Clean up resources\n",
+							"To ensure the Spark instance is shut down, end any connected sessions(notebooks). The pool shuts down when the **idle time** specified in the Apache Spark pool is reached. You can also select **stop session** from the status bar at the upper right of the notebook.\n",
+							"\n",
+							"![stopsession](https://adsnotebookrelease.blob.core.windows.net/adsnotebookrelease/adsnotebook/image/stopsession.png)"
+						]
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dev1-cool-notebook')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SampleSpark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "81df182b-ecb3-49d0-b34d-2735b4d8ced4"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/cf767466-c96d-4523-80c5-7466e7c7846e/resourceGroups/RayRGEUS/providers/Microsoft.Synapse/workspaces/elalab/bigDataPools/SampleSpark",
+						"name": "SampleSpark",
+						"type": "Spark",
+						"endpoint": "https://elalab.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SampleSpark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"print \"Hello world\""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SampleSpark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": false,
+					"maxNodeCount": 0,
+					"minNodeCount": 0
+				},
+				"nodeCount": 3,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SampleSQL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		}
+	]
+}
